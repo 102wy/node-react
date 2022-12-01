@@ -1,12 +1,32 @@
 const express = require("express");
 const app = express();
-const port = 5000
+const port = 5000;
 
-const mongoose = require('mongoose');
-mongoose.connect('mongodb+srv://102wy:Rkal0315!!@boilerplate.t7p8oj2.mongodb.net/?retryWrites=true&w=majority')
-.then(()=> console.log('MongoDB Connected...'))
-.catch(err => console.log(err));
+const bodyParser = require("body-parser");
+const { User } = require("./models/User");
 
-app.get('/',(req,res)=> res.send('Hello World'));
+const config = require("./config/key");
 
-app.listen(port, ()=> console.log(`Example app listening on port ${port}!`));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+const mongoose = require("mongoose");
+mongoose
+  .connect(config.mongoURI)
+  .then(() => console.log("MongoDB Connected..."))
+  .catch((err) => console.log(err));
+
+app.get("/", (req, res) => res.send("Hello World"));
+
+app.post("/register", (req, res) => {
+  const user = new User(req.body);
+  //몽고DB에 저장
+  user.save((err, doc) => {
+    if (err) return res.json({ success: false, err });
+    return res.status(200).json({
+      success: true,
+    });
+  });
+});
+
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
